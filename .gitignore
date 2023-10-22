@@ -1,0 +1,86 @@
+.env
+
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest cache
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Virtual environments
+venv/
+*.venv
+venv.bak/
+*.virtenv/
+virtualenv/
+
+# FastAPI uploads (if you're handling file uploads)
+uploads/
+
+# Docker
+Dockerfile.*.bak
+*.log
+*.db
+*.sqlite3
+*.sw?
+*~
+*.bak
+*backup*
+*.DS_Store
+*.egg-info/
+*.installed.cfg
+*.egg
+*.lock
+
+# Docker Compose
+docker-compose.override.yml
+docker-compose.*.yml
+docker-compose.*.yml.*
+docker-compose.*.override.yml
+
+# Docker artifacts
+*.image
+*.container
+*.volume
+*.network
+*.service
+*.stack
+*.secret
+
+# Docker volumes
+*.volumes/
+
+# Docker Machine
+.docker/machine/machines/
+.docker/machine/cache/
+.docker/machine/certs/
+
+# Docker Swarm
+.swarm/secrets/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.tmproj
+*.tmproject
+*.log
+*.sln.icons.cache
+*.suo
+*.user
+*.userosscache
+*.dbmdl
+*.dbproj.schemaview
+*.pfx
+*.publishsettings
+*.exclude
+
+# OS-specific files
+.DS_Store
+Thumbs.db
