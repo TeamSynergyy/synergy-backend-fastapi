@@ -15,7 +15,7 @@ SQLALCHEMY_DATABASE_URL=mysql+pymysql://{user}:{password}@{host}:{port}/{databas
 ```
 
 - `{user}`, `{password}`, `{port}`, `{database}`는 각각의 환경에 맞게 대체합니다.
-- Mac 또는 Windows에서 로컬 Docker 컨테이너 환경의 MySQL에 연결하려면 `{host}`를 `host.docker.internal`로 설정합니다.
+- Mac 또는 Windows에서 로컬 환경의 MySQL에 연결하려면 `{host}`를 `host.docker.internal`로 설정합니다.
 
 3. **Docker 이미지 빌드 및 컨테이너 실행**:
 
