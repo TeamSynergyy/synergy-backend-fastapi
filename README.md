@@ -24,4 +24,6 @@ docker build -t myimage .
 docker run -d --name mycontainer -p 80:80 myimage
 ```
 
+**주의: .env 파일을 포함한 도커 이미지를 공개 저장소에 업로드하지 마세요. 내부 민감한 정보가 노출될 수 있습니다.**
+
 이제 브라우저에서 [http://127.0.0.1/docs](http://127.0.0.1/docs) 주소로 접속하면 Swagger UI를 볼 수 있습니다.

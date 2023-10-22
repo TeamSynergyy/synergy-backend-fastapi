@@ -1,35 +1,18 @@
 from sqlalchemy.orm import Session
-
-from . import models, schemas
-
-
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+from sqlalchemy.sql import select
+from . import models
 
 
-def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+def get_new_creates(db: Session, lastFittedCreatedId: int):
+    return db.execute(
+        select(models.Post.user_id, models.Post.post_id).where(models.Post.post_id > lastFittedCreatedId)).fetchall()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+def get_new_commented(db: Session, lastFittedCommentId: int):
+    return db.execute(
+        select(models.Comment.user_id, models.Comment.post_id).where(models.Comment.comment_id > lastFittedCommentId)).fetchall()
 
 
-def create_user(db: Session, user: schemas.UserCreate):
-    db_user = models.User(email=user.email)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Item).offset(skip).limit(limit).all()
-
-
-def create_user_item(db: Session, item: schemas.ItemCreate, user_id: int):
-    db_item = models.Item(**item.dict(), owner_id=user_id)
-    db.add(db_item)
-    db.commit()
-    db.refresh(db_item)
-    return db_item
+def get_new_liked(db: Session, lastFittedLikeId: int):
+    return db.execute(
+        select(models.PostLike.user_id, models.PostLike.post_id).where(models.PostLike.post_id > lastFittedLikeId)).fetchall()

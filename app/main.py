@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select, desc
-from . import models, schemas
+from . import models, crud
 from .database import SessionLocal, engine
 from lightfm import LightFM
 from lightfm.data import Dataset
@@ -30,12 +30,9 @@ def get_db():
 
 
 def get_new_interactions(db: Session = Depends(get_db)):
-    creates = db.execute(
-        select(models.Post.user_id, models.Post.post_id).where(models.Post.post_id > lastFittedCreatedId)).fetchall()
-    commented = db.execute(
-        select(models.Comment.user_id, models.Comment.post_id).where(models.Comment.comment_id > lastFittedCommentId)).fetchall()
-    liked = db.execute(
-        select(models.PostLike.user_id, models.PostLike.post_id).where(models.PostLike.post_id > lastFittedLikeId)).fetchall()
+    creates = crud.get_new_creates(db, lastFittedCreatedId)
+    commented = crud.get_new_commented(db, lastFittedCommentId)
+    liked = crud.get_new_liked(db, lastFittedLikeId)
     return (creates, commented, liked)
 
 
@@ -55,7 +52,7 @@ def fit_model(db: Session = Depends(get_db)):
 
     fit_dataset(creates, commented, liked)
 
-    (interactions, weights) = dataset.build_interactions(
+    (interactions, _) = dataset.build_interactions(
         creates + commented + liked)
 
     print(repr(interactions))
@@ -71,10 +68,9 @@ def fit_model(db: Session = Depends(get_db)):
 
 
 @app.get("/recommend/{user_id}")
-def recommendPostToUser(user_id: str, db: Session = Depends(get_db)):
+def recommend_to_user(user_id: str, offset: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     try:
-        (umap, ufmap, imap, ifmap) = dataset.mapping()
-        print(umap[user_id])
+        (umap, _, imap, _) = dataset.mapping()
 
         items = np.array([
             x[0] for x in db.execute(
@@ -84,19 +80,12 @@ def recommendPostToUser(user_id: str, db: Session = Depends(get_db)):
             ).fetchmany(size=1000)
         ])
 
-        print(items)
-
         scores = model.predict(umap[user_id], [imap[x] for x in items])
-        print(scores)
 
         top_items = items[np.argsort(-scores)]
-        print(top_items)
 
-        top_item_authors = [db.execute(select(models.Post.user_id).where(
-            models.Post.post_id == x)).fetchone()[0] for x in top_items]
-        print(top_item_authors)
+        return top_items[offset:offset+limit].tolist()
 
-        return top_items.tolist()
     except KeyError:
         return []
 
