@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select, desc
 from . import models, crud
@@ -46,29 +46,34 @@ def fit_dataset(creates, commented, liked):
     print('Num users {}, num_items {}.'.format(num_users, num_items))
 
 
+@app.on_event("startup")
 @app.get("/fit_model/")
-def fit_model(db: Session = Depends(get_db)):
-    (creates, commented, liked) = get_new_interactions(db)
+def fit_model():
+    db = SessionLocal()
+    try:
+        (creates, commented, liked) = get_new_interactions(db)
 
-    fit_dataset(creates, commented, liked)
+        fit_dataset(creates, commented, liked)
 
-    (interactions, _) = dataset.build_interactions(
-        creates + commented + liked)
+        (interactions, _) = dataset.build_interactions(
+            creates + commented + liked)
 
-    print(repr(interactions))
-    model.fit(interactions, epochs=30)
+        print(repr(interactions))
+        model.fit(interactions, epochs=30)
 
-    global lastFittedCreatedId, lastFittedLikeId, lastFittedCommentId
-    if creates:
-        lastFittedCreatedId = max([x[1] for x in creates])
-    if commented:
-        lastFittedCommentId = max([x[1] for x in commented])
-    if liked:
-        lastFittedLikeId = max([x[1] for x in liked])
+        global lastFittedCreatedId, lastFittedLikeId, lastFittedCommentId
+        if creates:
+            lastFittedCreatedId = max([x[1] for x in creates])
+        if commented:
+            lastFittedCommentId = max([x[1] for x in commented])
+        if liked:
+            lastFittedLikeId = max([x[1] for x in liked])
+    finally:
+        db.close()
 
 
 @app.get("/recommend/{user_id}")
-def recommend_to_user(user_id: str, offset: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def recommend_to_user(user_id: str, db: Session = Depends(get_db)):
     try:
         (umap, _, imap, _) = dataset.mapping()
 
@@ -88,12 +93,7 @@ def recommend_to_user(user_id: str, offset: int = 0, limit: int = 10, db: Sessio
 
         top_items = items[np.argsort(-scores)]
 
-        return top_items[offset:offset+limit].tolist()
+        return top_items.tolist()
 
     except KeyError:
         return []
-
-
-@app.on_event("startup")
-async def startup_event():
-    fit_model(db=SessionLocal())
