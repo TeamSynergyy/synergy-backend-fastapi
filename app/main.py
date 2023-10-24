@@ -29,16 +29,9 @@ def get_db():
         db.close()
 
 
-def get_new_interactions(db: Session = Depends(get_db)):
-    creates = crud.get_new_creates(db, lastFittedCreatedId)
-    commented = crud.get_new_commented(db, lastFittedCommentId)
-    liked = crud.get_new_liked(db, lastFittedLikeId)
-    return (creates, commented, liked)
-
-
-def fit_dataset(creates, commented, liked):
-    users = set(list(map(lambda x: x[0], creates + commented + liked)))
-    items = set(list(map(lambda x: x[1], creates + commented + liked)))
+def fit_dataset(creates, comments, likes):
+    users = set(list(map(lambda x: x[0], creates + comments + likes)))
+    items = set(list(map(lambda x: x[1], creates + comments + likes)))
 
     dataset.fit_partial(users, items)
 
@@ -46,30 +39,28 @@ def fit_dataset(creates, commented, liked):
     print('Num users {}, num_items {}.'.format(num_users, num_items))
 
 
-@app.on_event("startup")
-@app.get("/fit_model/")
-def fit_model():
-    db = SessionLocal()
-    try:
-        (creates, commented, liked) = get_new_interactions(db)
+@app.get("/fit_model")
+def fit_model(db: Session = Depends(get_db)):
+    global lastFittedCreatedId, lastFittedLikeId, lastFittedCommentId
 
-        fit_dataset(creates, commented, liked)
+    creates = crud.get_new_creates(db, lastFittedCreatedId)
+    comments = crud.get_new_comments(db, lastFittedCommentId)
+    likes = crud.get_new_likes(db, lastFittedLikeId)
 
-        (interactions, _) = dataset.build_interactions(
-            creates + commented + liked)
+    fit_dataset(creates, comments, likes)
 
-        print(repr(interactions))
-        model.fit(interactions, epochs=30)
+    (interactions, _) = dataset.build_interactions(
+        creates + comments + likes)
 
-        global lastFittedCreatedId, lastFittedLikeId, lastFittedCommentId
-        if creates:
-            lastFittedCreatedId = max([x[1] for x in creates])
-        if commented:
-            lastFittedCommentId = max([x[1] for x in commented])
-        if liked:
-            lastFittedLikeId = max([x[1] for x in liked])
-    finally:
-        db.close()
+    print(repr(interactions))
+    model.fit(interactions, epochs=30)
+
+    if creates:
+        lastFittedCreatedId = max([x[1] for x in creates])
+    if comments:
+        lastFittedCommentId = max([x[1] for x in comments])
+    if likes:
+        lastFittedLikeId = max([x[1] for x in likes])
 
 
 @app.get("/recommend/{user_id}")
@@ -97,3 +88,9 @@ def recommend_to_user(user_id: str, db: Session = Depends(get_db)):
 
     except KeyError:
         return []
+
+
+@app.on_event("startup")
+def startup_event():
+    db = SessionLocal()
+    fit_model(db)
