@@ -72,13 +72,17 @@ def recommend_to_user(user_id: str, offset: int = 0, limit: int = 10, db: Sessio
     try:
         (umap, _, imap, _) = dataset.mapping()
 
-        items = np.array([
+        items = [
             x[0] for x in db.execute(
                 select(models.Post.post_id)
                 .where(models.Post.user_id != user_id)
                 .order_by(desc(models.Post.post_id))
             ).fetchmany(size=1000)
-        ])
+        ]
+        if len(items) == 0:
+            return []
+
+        items = np.array(items)
 
         scores = model.predict(umap[user_id], [imap[x] for x in items])
 
