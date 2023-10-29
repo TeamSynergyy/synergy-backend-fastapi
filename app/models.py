@@ -47,3 +47,37 @@ class PostLike(Base):
 
     user = relationship("User", back_populates="post_likes")
     post = relationship("Post", back_populates="likes")
+
+
+class Project(Base):
+    __tablename__ = "project"
+
+    project_id = Column(BigInteger, primary_key=True,
+                        index=True, autoincrement=True)
+    leader_id = Column(VARCHAR(64), ForeignKey("user.user_id"))
+    field = Column(VARCHAR(255))
+
+    likes = relationship("ProjectLike", back_populates="project")
+    applies = relationship("Apply", back_populates="project")
+
+
+class ProjectLike(Base):
+    __tablename__ = "project_like"
+
+    project_like_id = Column(BigInteger, primary_key=True,
+                             index=True, autoincrement=True)
+    project_id = Column(BigInteger, ForeignKey("project.project_id"))
+    user_id = Column(VARCHAR(64), ForeignKey("user.user_id"))
+
+    project = relationship("Project", back_populates="likes")
+
+
+class Apply(Base):
+    __tablename__ = "apply"
+
+    apply_id = Column(BigInteger, primary_key=True,
+                      index=True, autoincrement=True)
+    project_id = Column(BigInteger, ForeignKey("project.project_id"))
+    user_id = Column(VARCHAR(64), ForeignKey("user.user_id"))
+
+    project = relationship("Project", back_populates="applies")

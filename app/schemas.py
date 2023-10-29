@@ -48,6 +48,19 @@ class PostLike(PostLikeBase):
         orm_mode = True
 
 
-# 이렇게 나중에 선언된 모델을 참조할 수 있도록 하기 위해 별도로 설정해줍니다.
-User.update_forward_refs()
-Post.update_forward_refs()
+class ProjectBase(BaseModel):
+    project_id: int
+    leader_id: str
+    field: str
+
+
+class ProjectLikeBase(BaseModel):
+    project_like_id: int
+    project_id: int
+    user_id: str
+
+
+class ApplyBase(BaseModel):
+    apply_id: int
+    project_id: int
+    user_id: str
