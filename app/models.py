@@ -8,6 +8,13 @@ class User(Base):
     __tablename__ = "user"
 
     user_id = Column(VARCHAR(64), primary_key=True, index=True)
+    organization = Column(VARCHAR(255))
+    major = Column(VARCHAR(255))
+    minor = Column(VARCHAR(255))
+
+    interest_areas = Column(VARCHAR(255))
+    skills = Column(VARCHAR(255))
+
     posts = relationship("Post", back_populates="user")
     comments = relationship("Comment", back_populates="user")
     post_likes = relationship("PostLike", back_populates="user")

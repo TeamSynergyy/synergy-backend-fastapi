@@ -31,3 +31,7 @@ def get_new_project_likes(db: Session, last_id: int):
 def get_new_project_applies(db: Session, last_id: int):
     return db.execute(
         select(models.Apply.user_id, models.Apply.project_id).where(models.Apply.apply_id > last_id)).fetchall()
+
+
+def get_users(db: Session):
+    return db.query(models.User).all()
