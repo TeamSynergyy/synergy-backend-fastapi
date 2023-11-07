@@ -42,8 +42,9 @@ LightFM은 협업 필터링과 콘텐츠 기반 필터링을 결합한 하이브
 ## API 엔드포인트
 
 - **/fit_model**: 모델을 새로운 데이터로 학습시킵니다.
-- **/recommend/posts/{user_id}**: 특정 사용자에 대한 추천 포스트를 제공합니다.
-- **/recommend/projects/{user_id}**: 특정 사용자에 대한 추천 프로젝트를 제공합니다.
+- **/recommend/posts/{user_id}**: 특정 사용자에 대한 추천 포스트들의 id를 제공합니다.
+- **/recommend/projects/{user_id}**: 특정 사용자에 대한 추천 프로젝트들의 id를 제공합니다.
+- **/users/similar/{user_id}**: 특정 사용자와 유사한 사용자들의 ids를 제공합니다.
 
 ## 로컬 환경 테스트 방법
 
@@ -60,7 +61,7 @@ SQLALCHEMY_DATABASE_URL=mysql+pymysql://{user}:{password}@{host}:{port}/{databas
 ```
 
 - `{user}`, `{password}`, `{port}`, `{database}`는 각각의 환경에 맞게 대체합니다.
-- Mac 또는 Windows에서 로컬 환경의 MySQL에 연결하려면 `{host}`를 `host.docker.internal`로 설정합니다.
+- Mac 또는 Windows에서 로컬 환경의 MySQL(localhost)에 연결하려면 `{host}`를 `host.docker.internal`로 설정합니다.
 
 ### Docker 이미지 빌드 및 컨테이너 실행
 

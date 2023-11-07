@@ -72,7 +72,6 @@ def fit_dataset_project(project_creates, project_applies, project_likes, users):
 def create_user_features_base(users):
     user_features_base = []
     for user in users:
-        print(user.user_id)
         features = []
 
         if user.organization:
@@ -81,8 +80,8 @@ def create_user_features_base(users):
             features.append(f"major:{user.major}")
         if user.minor:
             features.append(f"minor:{user.minor}")
-        if user.interest_areas:
-            features.append(f"interest_areas:{user.interest_areas}")
+        if user.interestAreas:
+            features.append(f"interest_areas:{user.interestAreas}")
         if user.skills:
             features.append(f"skills:{user.skills}")
         # if user.interest_areas:
@@ -97,62 +96,67 @@ def create_user_features_base(users):
 
 @app.get("/fit_model")
 def fit_model(db: Session = Depends(get_db)):
-    global lastFittedPostCreateId, lastFittedPostLikeId, lastFittedPostCommentId
+    try:
+        global lastFittedPostCreateId, lastFittedPostLikeId, lastFittedPostCommentId
 
-    post_creates = crud.get_new_post_creates(db, lastFittedPostCreateId)
-    post_comments = crud.get_new_post_comments(db, lastFittedPostCommentId)
-    post_likes = crud.get_new_post_likes(db, lastFittedPostLikeId)
+        post_creates = crud.get_new_post_creates(db, lastFittedPostCreateId)
+        post_comments = crud.get_new_post_comments(db, lastFittedPostCommentId)
+        post_likes = crud.get_new_post_likes(db, lastFittedPostLikeId)
 
-    users = crud.get_users(db)
+        users = crud.get_users(db)
 
-    fit_dataset_post(post_creates, post_comments, post_likes,
-                     users)
+        fit_dataset_post(post_creates, post_comments, post_likes,
+                         users)
 
-    (post_interactions, _) = dataset_post.build_interactions(
-        post_creates + post_comments + post_likes)
+        (post_interactions, _) = dataset_post.build_interactions(
+            post_creates + post_comments + post_likes)
 
-    user_features_post = dataset_post.build_user_features(
-        create_user_features_base(users))
+        user_features_post = dataset_post.build_user_features(
+            create_user_features_base(users))
 
-    print(repr(post_interactions))
+        print(repr(post_interactions))
 
-    lfm_post.fit_partial(
-        post_interactions, user_features=user_features_post, epochs=30)
+        lfm_post.fit_partial(
+            post_interactions, user_features=user_features_post, epochs=30)
 
-    if post_creates:
-        lastFittedPostCreateId = max([x[1] for x in post_creates])
-    if post_comments:
-        lastFittedPostCommentId = max([x[1] for x in post_comments])
-    if post_likes:
-        lastFittedPostLikeId = max([x[1] for x in post_likes])
+        if post_creates:
+            lastFittedPostCreateId = max([x[1] for x in post_creates])
+        if post_comments:
+            lastFittedPostCommentId = max([x[1] for x in post_comments])
+        if post_likes:
+            lastFittedPostLikeId = max([x[1] for x in post_likes])
 
-    global lastFittedProjectCreateId, lastFittedProjectLikeId, lastFittedProjectApplyId
+        global lastFittedProjectCreateId, lastFittedProjectLikeId, lastFittedProjectApplyId
 
-    project_creates = list(map(lambda x: (x[0], x[1]), crud.get_new_projects(
-        db, lastFittedProjectCreateId)))
-    project_applies = crud.get_new_project_applies(
-        db, lastFittedProjectApplyId)
-    project_likes = crud.get_new_project_likes(db, lastFittedProjectLikeId)
+        project_creates = list(map(lambda x: (x[0], x[1]), crud.get_new_projects(
+            db, lastFittedProjectCreateId)))
+        project_applies = crud.get_new_project_applies(
+            db, lastFittedProjectApplyId)
+        project_likes = crud.get_new_project_likes(db, lastFittedProjectLikeId)
 
-    fit_dataset_project(project_creates, project_applies,
-                        project_likes, users)
+        fit_dataset_project(project_creates, project_applies,
+                            project_likes, users)
 
-    (project_interactions, _) = dataset_project.build_interactions(
-        project_creates + project_applies + project_likes)
+        (project_interactions, _) = dataset_project.build_interactions(
+            project_creates + project_applies + project_likes)
 
-    user_features_project = dataset_project.build_user_features(
-        create_user_features_base(users))
+        user_features_project = dataset_project.build_user_features(
+            create_user_features_base(users))
 
-    print(repr(project_interactions))
-    lfm_project.fit_partial(project_interactions,
-                            user_features=user_features_project, epochs=30)
+        print(repr(project_interactions))
+        lfm_project.fit_partial(project_interactions,
+                                user_features=user_features_project, epochs=30)
 
-    if project_creates:
-        lastFittedProjectCreateId = max([x[1] for x in project_creates])
-    if project_applies:
-        lastFittedProjectApplyId = max([x[1] for x in project_applies])
-    if project_likes:
-        lastFittedProjectLikeId = max([x[1] for x in project_likes])
+        if project_creates:
+            lastFittedProjectCreateId = max([x[1] for x in project_creates])
+        if project_applies:
+            lastFittedProjectApplyId = max([x[1] for x in project_applies])
+        if project_likes:
+            lastFittedProjectLikeId = max([x[1] for x in project_likes])
+
+        return "success"
+    except:
+        return "error"
 
 
 @app.get("/recommend/posts/{user_id}")
@@ -180,6 +184,8 @@ def recommend_posts_to_user(user_id: str, db: Session = Depends(get_db)):
 
     except KeyError:
         return []
+    except:
+        return "error"
 
 
 @app.get("/recommend/projects/{user_id}")
@@ -207,6 +213,42 @@ def recommend_projects_to_user(user_id: str, db: Session = Depends(get_db)):
 
     except KeyError:
         return []
+    except:
+        return "error"
+
+
+@app.get("/users/similar/{user_id}")
+def similar_users(user_id: str, db: Session = Depends(get_db)):
+    from sklearn.metrics.pairwise import cosine_similarity
+
+    try:
+        (umap, _, _, _) = dataset_post.mapping()
+
+        users = crud.get_users(db)
+        user_features_post = dataset_post.build_user_features(
+            create_user_features_base(users))
+
+        _, user_embeddings = lfm_post.get_user_representations(
+            user_features_post)
+
+        target_user_embedding = user_embeddings[umap[user_id]].reshape(1, -1)
+
+        similarities = cosine_similarity(
+            target_user_embedding, user_embeddings)
+
+        similarities[0, umap[user_id]] = -1
+
+        # 상위 10개 유저
+        most_similar_user_indices = np.argsort(-similarities[0])[:10]
+
+        reverse_umap = {v: k for k, v in umap.items()}
+        most_similar_user_ids = [reverse_umap[idx]
+                                 for idx in most_similar_user_indices]
+
+        return most_similar_user_ids
+
+    except:
+        return "error"
 
 
 @app.on_event("startup")

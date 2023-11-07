@@ -12,7 +12,7 @@ class User(Base):
     major = Column(VARCHAR(255))
     minor = Column(VARCHAR(255))
 
-    interest_areas = Column(VARCHAR(255))
+    interestAreas = Column(VARCHAR(255))
     skills = Column(VARCHAR(255))
 
     posts = relationship("Post", back_populates="user")
