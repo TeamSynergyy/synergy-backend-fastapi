@@ -184,6 +184,7 @@ def recommend_posts_to_user(user_id: str, db: Session = Depends(get_db)):
         return top_items.tolist()
 
     except KeyError:
+        print(e)
         return []
     except Exception as e:
         print(e)
