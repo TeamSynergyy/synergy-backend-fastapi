@@ -155,7 +155,8 @@ def fit_model(db: Session = Depends(get_db)):
             lastFittedProjectLikeId = max([x[1] for x in project_likes])
 
         return "success"
-    except:
+    except Exception as e:
+        print(e)
         return "error"
 
 
@@ -184,7 +185,8 @@ def recommend_posts_to_user(user_id: str, db: Session = Depends(get_db)):
 
     except KeyError:
         return []
-    except:
+    except Exception as e:
+        print(e)
         return "error"
 
 
@@ -211,9 +213,11 @@ def recommend_projects_to_user(user_id: str, db: Session = Depends(get_db)):
 
         return top_items.tolist()
 
-    except KeyError:
+    except KeyError as e:
+        print(e)
         return []
-    except:
+    except Exception as e:
+        print(e)
         return "error"
 
 
@@ -247,7 +251,8 @@ def similar_users(user_id: str, db: Session = Depends(get_db)):
 
         return most_similar_user_ids
 
-    except:
+    except Exception as e:
+        print(e)
         return "error"
 
 
