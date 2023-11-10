@@ -80,8 +80,8 @@ def create_user_features_base(users):
             features.append(f"major:{user.major}")
         if user.minor:
             features.append(f"minor:{user.minor}")
-        if user.interestAreas:
-            features.append(f"interest_areas:{user.interestAreas}")
+        if user.interest_areas:
+            features.append(f"interest_areas:{user.interest_areas}")
         if user.skills:
             features.append(f"skills:{user.skills}")
         # if user.interest_areas:

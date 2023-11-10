@@ -7,7 +7,7 @@ class UserBase(BaseModel):
     organization: str
     major: str
     minor: str
-    interestAreas: str
+    interest_areas: str
     skills: str
 
 
