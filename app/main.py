@@ -105,11 +105,11 @@ def fit_model(db: Session = Depends(get_db)):
 
         users = crud.get_users(db)
 
-        fit_dataset_post(post_creates, post_comments, post_likes,
+        fit_dataset_post(post_creates, post_comments[0:2], post_likes[0:2],
                          users)
 
         (post_interactions, _) = dataset_post.build_interactions(
-            post_creates + post_comments + post_likes)
+            post_creates + post_comments[0:2] + post_likes[0:2])
 
         user_features_post = dataset_post.build_user_features(
             create_user_features_base(users))
@@ -122,9 +122,9 @@ def fit_model(db: Session = Depends(get_db)):
         if post_creates:
             lastFittedPostCreateId = max([x[1] for x in post_creates])
         if post_comments:
-            lastFittedPostCommentId = max([x[1] for x in post_comments])
+            lastFittedPostCommentId = max([x[2] for x in post_comments])
         if post_likes:
-            lastFittedPostLikeId = max([x[1] for x in post_likes])
+            lastFittedPostLikeId = max([x[2] for x in post_likes])
 
         global lastFittedProjectCreateId, lastFittedProjectLikeId, lastFittedProjectApplyId
 
@@ -134,11 +134,11 @@ def fit_model(db: Session = Depends(get_db)):
             db, lastFittedProjectApplyId)
         project_likes = crud.get_new_project_likes(db, lastFittedProjectLikeId)
 
-        fit_dataset_project(project_creates, project_applies,
-                            project_likes, users)
+        fit_dataset_project(project_creates, project_applies[0:2],
+                            project_likes[0:2], users)
 
         (project_interactions, _) = dataset_project.build_interactions(
-            project_creates + project_applies + project_likes)
+            project_creates + project_applies[0:2] + project_likes[0:2])
 
         user_features_project = dataset_project.build_user_features(
             create_user_features_base(users))
@@ -150,9 +150,9 @@ def fit_model(db: Session = Depends(get_db)):
         if project_creates:
             lastFittedProjectCreateId = max([x[1] for x in project_creates])
         if project_applies:
-            lastFittedProjectApplyId = max([x[1] for x in project_applies])
+            lastFittedProjectApplyId = max([x[2] for x in project_applies])
         if project_likes:
-            lastFittedProjectLikeId = max([x[1] for x in project_likes])
+            lastFittedProjectLikeId = max([x[2] for x in project_likes])
 
         return "success"
     except Exception as e:

@@ -10,12 +10,12 @@ def get_new_post_creates(db: Session, last_id: int):
 
 def get_new_post_comments(db: Session, last_id: int):
     return db.execute(
-        select(models.Comment.user_id, models.Comment.post_id).where(models.Comment.comment_id > last_id)).fetchall()
+        select(models.Comment.user_id, models.Comment.post_id, models.Comment.comment_id).where(models.Comment.comment_id > last_id)).fetchall()
 
 
 def get_new_post_likes(db: Session, last_id: int):
     return db.execute(
-        select(models.PostLike.user_id, models.PostLike.post_id).where(models.PostLike.post_id > last_id)).fetchall()
+        select(models.PostLike.user_id, models.PostLike.post_id, models.PostLike.post_like_id).where(models.PostLike.post_like_id > last_id)).fetchall()
 
 
 def get_new_projects(db: Session, last_id: int):
@@ -25,12 +25,12 @@ def get_new_projects(db: Session, last_id: int):
 
 def get_new_project_likes(db: Session, last_id: int):
     return db.execute(
-        select(models.ProjectLike.user_id, models.ProjectLike.project_id).where(models.ProjectLike.project_like_id > last_id)).fetchall()
+        select(models.ProjectLike.user_id, models.ProjectLike.project_id, models.ProjectLike.project_like_id).where(models.ProjectLike.project_like_id > last_id)).fetchall()
 
 
 def get_new_project_applies(db: Session, last_id: int):
     return db.execute(
-        select(models.Apply.user_id, models.Apply.project_id).where(models.Apply.apply_id > last_id)).fetchall()
+        select(models.Apply.user_id, models.Apply.project_id, models.Apply.apply_id,).where(models.Apply.apply_id > last_id)).fetchall()
 
 
 def get_users(db: Session):
